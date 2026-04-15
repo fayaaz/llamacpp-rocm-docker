@@ -1,0 +1,32 @@
+services:
+  server:
+    image: ghcr.io/ggml-org/llama.cpp:server-rocm
+    container_name: llama.cpp.server
+    restart: always
+    volumes:
+      - ~/.models:/models
+      - ./config.ini:/config.ini
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    ports:
+      - "8080:8080"
+    command: [
+      "--models-dir", "/models",
+      "--models-preset", "/config.ini",
+      "--host", "0.0.0.0",
+      "--port", "8080"
+    ]
+  downloader:
+    image: python:3.11-slim
+    container_name: hf.downloader
+    volumes:
+      - ~/.models:/models
+    working_dir: /models
+    environment:
+      - HF_HOME=/models/.cache
+      - HF_TRANSFER=1
+    command: >
+      bash -c "
+      pip install --no-cache-dir huggingface_hub hf_transfer &&
+      tail -f /dev/null"
