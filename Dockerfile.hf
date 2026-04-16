@@ -1,0 +1,8 @@
+FROM python:3.11-slim
+
+RUN pip install --no-cache-dir huggingface_hub hf_transfer
+
+WORKDIR /models
+
+ENV HF_HOME=/models/.cache
+ENV HF_TRANSFER=1
