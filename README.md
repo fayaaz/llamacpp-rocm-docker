@@ -21,16 +21,19 @@ and is focussed around running Gemma4.
 
 ## Getting Started
 
+
 1. **Start the services**:
+    Make the .models folder first. If you want this elsewhere change it in the docker-compose.yml
+
    ```bash
    docker compose up -d
    ```
 
 2. **Download a model**:
-    Use the `downloader` service to fetch models from Hugging Face. Replace `<repo_id>` with the Hugging Face repository. For example, to download the Gemma-4-26B model:
+    Use the `downloader` service to fetch models from Hugging Face. Replace `<repo_id>` with the Hugging Face repository. For example, to download the Gemma-4-26B-A4B-it model:
 
     ```bash
-     docker exec -it hf.downloader hf download --local-dir /models unsloth/gemma-4-26B-A4B-it-GGUF gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
+     docker compose run --rm downloader hf download --local-dir /models unsloth/gemma-4-26B-A4B-it-GGUF gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
     ```
 
     *Note: The models will be stored in `~/.models` on your host machine.*
