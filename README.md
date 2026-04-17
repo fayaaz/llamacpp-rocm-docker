@@ -7,7 +7,7 @@ This has been tested on a PC with specs:
 - RAM: 64GB
 - GPU: 9070XT with 16GB VRAM
 
-and is focussed around running Gemma4.
+and is focused around running Gemma4-26B-A4B and qwen-3.5-27b.
 
 ## Services
 
@@ -33,7 +33,9 @@ and is focussed around running Gemma4.
     Use the `downloader` service to fetch models from Hugging Face. Replace `<repo_id>` with the Hugging Face repository. For example, to download the Gemma-4-26B-A4B-it model:
 
     ```bash
-     docker compose run --rm downloader hf download --local-dir /models unsloth/gemma-4-26B-A4B-it-GGUF gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
+    docker compose run --rm downloader hf download --local-dir /models unsloth/gemma-4-26B-A4B-it-GGUF gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
+    # Qwen 3.5
+     docker compose run --rm downloader hf download --local-dir /models bartowski/Qwen_Qwen3.5-27B-GGUF Qwen_Qwen3.5-27B-IQ3_M.gguf
     ```
 
     *Note: The models will be stored in `~/.models` on your host machine.*
