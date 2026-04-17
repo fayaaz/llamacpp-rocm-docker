@@ -44,7 +44,7 @@
                     "name": "qwen-3.5-27b",
                     "tool_call": true,
                     "limit": {
-                        "context": 42072,
+                        "context": 40072,
                         "output": 8192
                     }
                 }
