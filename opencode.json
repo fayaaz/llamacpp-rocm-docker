@@ -47,6 +47,30 @@
                         "context": 40072,
                         "output": 8192
                     }
+                },
+                "qwen-3.5-27b-64k": {
+                    "name": "qwen-3.5-27b-64k",
+                    "tool_call": true,
+                    "limit": {
+                        "context": 65536,
+                        "output": 8192
+                    }
+                },
+                "gemma-4-31b": {
+                    "name": "gemma-4-31b",
+                    "tool_call": true,
+                    "limit": {
+                        "context": 65536,
+                        "output": 8192
+                    }
+                },
+                "qwen3.6-35b": {
+                    "name": "qwen3.6-35b",
+                    "tool_call": true,
+                    "limit": {
+                        "context": 65536,
+                        "output": 8192
+                    }
                 }
             }
         }

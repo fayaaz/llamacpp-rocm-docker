@@ -36,6 +36,10 @@ and is focused around running Gemma4-26B-A4B and qwen-3.5-27b.
     docker compose run --rm downloader hf download --local-dir /models unsloth/gemma-4-26B-A4B-it-GGUF gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
     # Qwen 3.5
      docker compose run --rm downloader hf download --local-dir /models bartowski/Qwen_Qwen3.5-27B-GGUF Qwen_Qwen3.5-27B-IQ3_M.gguf
+    # Gemma 4 31B
+     docker compose run --rm downloader hf download --local-dir /models bartowski/google_gemma-4-31B-it-GGUF gemma-4-31B-it-Q6_K.gguf
+    # Qwen 3.6-35B-A3B
+     docker compose run --rm downloader hf download --local-dir /models unsloth/Qwen3.6-35B-A3B-GGUF Qwen3.6-35B-A3B-UD-IQ4_XS.gguf
     ```
 
     *Note: The models will be stored in `~/.models` on your host machine.*
