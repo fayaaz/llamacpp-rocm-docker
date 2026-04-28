@@ -28,15 +28,15 @@
                     "name": "gemma-4-26b-hq",
                     "tool_call": true,
                     "limit": {
-                        "context": 32768,
+                        "context": 64768,
                         "output": 8192
                     }
                 },
-                "gemma-4-26b-64k": {
+                "gemma-4-26b-lc": {
                     "name": "gemma-4-26b-64k",
                     "tool_call": true,
                     "limit": {
-                        "context": 65536,
+                        "context": 86536,
                         "output": 8192
                     }
                 },

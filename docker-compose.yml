@@ -1,6 +1,6 @@
 services:
   server:
-    image: ghcr.io/ggml-org/llama.cpp:server-rocm
+    image: ghcr.io/ggml-org/llama.cpp:server-vulkan
     container_name: llama.cpp.server
     restart: always
     shm_size: '16gb'
@@ -12,14 +12,14 @@ services:
       - /dev/dri:/dev/dri
     group_add:
       - video
-      - render
     ports:
       - "8080:8080"
     command: [
       "--models-dir", "/models",
       "--models-preset", "/config.ini",
       "--host", "0.0.0.0",
-      "--port", "8080"
+      "--port", "8080",
+      "--parallel", "1",
     ]
     environment:
       - HSA_OVERRIDE_GFX_VERSION=12.0.0
