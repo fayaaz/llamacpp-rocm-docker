@@ -17,6 +17,7 @@ services:
     command: [
       "--models-dir", "/models",
       "--models-preset", "/config.ini",
+      "--max-models", "1",
       "--host", "0.0.0.0",
       "--port", "8080",
       "--parallel", "1",
