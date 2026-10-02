@@ -42,6 +42,8 @@ and is focused around running Gemma4-26B-A4B and qwen-3.5-27b.
      docker compose run --rm downloader hf download --local-dir /models unsloth/Qwen3.6-35B-A3B-GGUF Qwen3.6-35B-A3B-UD-IQ4_XS.gguf
     # GLM Flash 4.7
      docker compose run --rm downloader hf download --local-dir /models unsloth/GLM-4.7-Flash-GGUF GLM-4.7-Flash-UD-Q4_K_XL.gguf
+    # Qwen 3.8-27B uncensored (Heretic abliterated, imatrix)
+     docker compose run --rm downloader hf download --local-dir /models JonathanColetti/Qwen3.8-27B-Uncensored-GGUF Qwen3.8-27B-Uncensored-IQ4_XS.gguf
 
     ```
 
