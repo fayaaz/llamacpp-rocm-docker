@@ -1,6 +1,6 @@
 services:
   server:
-    image: ghcr.io/<owner>/llama-cpp-vulkan-rpc:latest
+    image: ghcr.io/fayaaz/llama-cpp-vulkan-rpc:latest
     container_name: llama.cpp.server
     restart: always
     shm_size: '16gb'

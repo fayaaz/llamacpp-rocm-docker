@@ -17,7 +17,7 @@ Important operational details:
 
 - `split-mode = layer` is required for cross-device splitting. `split-mode = none` pins everything to `main-gpu` and the RPC worker is only probed, never used.
 - `--fit` computes an offload plan across local GPUs and the RPC device. If KV cache or a draft model does not fit in the combined VRAM, they spill to system RAM first; the model still runs, but slowly.
-- The RPC server always exports all backends it was built with (Vulkan/CPU here). Our custom image `ghcr.io/<owner>/llama-cpp-vulkan-rpc` is built with `GGML_VULKAN=ON` and `GGML_RPC=ON` from upstream `.devops/vulkan.Dockerfile`, and includes `ggml-rpc-server`.
+- The RPC server always exports all backends it was built with (Vulkan/CPU here). Our custom image `ghcr.io/fayaaz/llama-cpp-vulkan-rpc` is built with `GGML_VULKAN=ON` and `GGML_RPC=ON` from upstream `.devops/vulkan.Dockerfile`, and includes `ggml-rpc-server`.
 
 ## Client setup (primary / 9700 XT)
 
