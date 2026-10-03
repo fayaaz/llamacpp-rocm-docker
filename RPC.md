@@ -85,6 +85,10 @@ Tokens/s numbers are from the last load-bearing requests on primary (`llama-serv
 | `qwen-3.8-27b-uncensored-100k` | Qwen3.8-27B-Uncensored-IQ4_XS | 102k | layer | fused MTP (`n_max=2`) | 82.2 | 24.2 |
 | `qwen-3.8-27b-q4km` | Qwen3.8-27B-UD-Q4_K_M | 65k | layer | separate MTP Q4_0 | 116.3 | 40.2 |
 | `qwen-3.8-27b-udq6k` | Qwen3.8-27B-UD-Q6_K | 131k | layer | separate MTP Q4_0 | 102.9 | 14.8 |
+| `ornith-1.0-35b` | ornith-1.0-35b-Q4_K_M | 65k | layer | fused MTP | 295.8 | 26.8 |
+| `ornith-1.0-35b-vision` | Ornith-1.0-35B-MTP-APEX-I-Compact | 65k | layer | fused MTP | 230.4 | 26.1 |
+| `ornith-1.0-9b` | Ornith-1.0-9B-Q8_0 | 65k | layer | none | 558.3 | 32.7 |
+| `ornith-1.5-35b-abliterated` | Huihui-Ornith-1.5-35B-A3B-abliterated | 65k | layer | none | 233.1 | 26.2 |
 
 Notes on the measurements:
 
