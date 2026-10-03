@@ -1,6 +1,6 @@
-# Llama.cpp Docker Setup (ROCm)
+# Llama.cpp Docker Setup (Vulkan)
 
-This repository provides a `docker-compose.yml` configuration to run a `llama.cpp` server with ROCm support and a convenient Hugging Face model downloader.
+This repository provides a `docker-compose.yml` configuration to run a `llama.cpp` server with Vulkan support and a convenient Hugging Face model downloader.
 
 This has been tested on a PC with specs:
 - CPU: 9950X3D
@@ -11,13 +11,13 @@ and is focused around running Gemma4-26B-A4B and qwen-3.5-27b.
 
 ## Services
 
-- **`server`**: Runs the `llama.cpp` server. It is configured to use ROCm for hardware acceleration.
+- **`server`**: Runs the `llama.cpp` server. It is configured to use Vulkan for hardware acceleration.
 - **`downloader`**: A Python-based utility container used to download models from Hugging Face using `hf_transfer` for high-speed downloads.
 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
-- An AMD GPU with appropriate ROCm drivers installed on the host.
+- An AMD GPU with appropriate Vulkan drivers installed on the host.
 
 ## Getting Started
 
