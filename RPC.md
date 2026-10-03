@@ -19,7 +19,7 @@ Important operational details:
 - `--fit` computes an offload plan across local GPUs and the RPC device. If KV cache or a draft model does not fit in the combined VRAM, they spill to system RAM first; the model still runs, but slowly.
 - The RPC server always exports all backends it was built with (Vulkan/CPU here). Our custom image `ghcr.io/fayaaz/llama-cpp-vulkan-rpc` is built with `GGML_VULKAN=ON` and `GGML_RPC=ON` from upstream `.devops/vulkan.Dockerfile`, and includes `ggml-rpc-server`.
 
-## Client setup (primary / 9700 XT)
+## Client setup (primary / 9070 XT)
 
 `config.ini` preset example (`qwen-3.8-27b-uncensored-100k`):
 
@@ -82,9 +82,9 @@ Tokens/s numbers are from the last load-bearing requests on primary (`llama-serv
 | Preset | Main GGUF | ctx | split | draft | prompt eval tok/s | decode tok/s |
 |---|---|---|---|---|---|---|
 | `qwen-3.8-27b-100k` | Qwen3.8-27B-IQ4_XS (no MTP) | 102k | layer | none | 22.9 | 4.9 |
-| `qwen-3.8-27b-uncensored-100k` | Qwen3.8-27B-Uncensored-IQ4_XS | 102k | layer | fused MTP (`n_max=2`) | 33–37 | 32.2 |
-| `qwen-3.8-27b-q4km` | Qwen3.8-27B-UD-Q4_K_M | 65k | layer | separate `mtp-Qwen3.8-27B-Q4_0` | 33–40 | ~25–29 |
-| `qwen-3.8-27b-udq6k` | Qwen3.8-27B-UD-Q6_K | 131k | layer | separate MTP Q4_0 | 399–386 | ~19.0–19.5 |
+| `qwen-3.8-27b-uncensored-100k` | Qwen3.8-27B-Uncensored-IQ4_XS | 102k | layer | fused MTP (`n_max=2`) | 82.2 | 24.2 |
+| `qwen-3.8-27b-q4km` | Qwen3.8-27B-UD-Q4_K_M | 65k | layer | separate MTP Q4_0 | 116.3 | 40.2 |
+| `qwen-3.8-27b-udq6k` | Qwen3.8-27B-UD-Q6_K | 131k | layer | separate MTP Q4_0 | 102.9 | 14.8 |
 
 Notes on the measurements:
 
