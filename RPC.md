@@ -4,10 +4,10 @@
 
 | Node | CPU | RAM | GPU | VRAM |
 |---|---|---|---|---|
-| Arches | AMD Ryzen 9 9950X3D | 64 GB | AMD Radeon RX 9700 XT | 16 GB |
-| ownraptor | AMD Ryzen 5 3600 | 16 GB | AMD Radeon RX 6600 XT | 8 GB |
+| primary | AMD Ryzen 9 9950X3D | 64 GB | AMD Radeon RX 9700 XT | 16 GB |
+| worker | AMD Ryzen 5 3600 | 16 GB | AMD Radeon RX 6600 XT | 8 GB |
 
-Combined VRAM: ~24 GB. Network: LAN between the two nodes. RPC server runs on the 6600 XT box (ownraptor), llama-server runs on the 9700 XT box (Arches).
+Combined VRAM: ~24 GB. Network: LAN between the two nodes. RPC server runs on the 6600 XT box (worker), llama-server runs on the 9700 XT box (primary).
 
 ## llama.cpp RPC overview
 
@@ -17,9 +17,9 @@ Important operational details:
 
 - `split-mode = layer` is required for cross-device splitting. `split-mode = none` pins everything to `main-gpu` and the RPC worker is only probed, never used.
 - `--fit` computes an offload plan across local GPUs and the RPC device. If KV cache or a draft model does not fit in the combined VRAM, they spill to system RAM first; the model still runs, but slowly.
-- The RPC server always exports all backends it was built with (Vulkan/CPU here). Our custom image `ghcr.io/fayaaz/llama-cpp-vulkan-rpc` is built with `GGML_VULKAN=ON` and `GGML_RPC=ON` from upstream `.devops/vulkan.Dockerfile`, and includes `ggml-rpc-server`.
+- The RPC server always exports all backends it was built with (Vulkan/CPU here). Our custom image `ghcr.io/<owner>/llama-cpp-vulkan-rpc` is built with `GGML_VULKAN=ON` and `GGML_RPC=ON` from upstream `.devops/vulkan.Dockerfile`, and includes `ggml-rpc-server`.
 
-## Client setup (Arches / 9700 XT)
+## Client setup (primary / 9700 XT)
 
 `config.ini` preset example (`qwen-3.8-27b-uncensored-100k`):
 
@@ -55,7 +55,7 @@ environment:
 `.env` (gitignored, create locally):
 
 ```
-LLAMA_ARG_RPC=192.168.0.110:30552
+LLAMA_ARG_RPC=<worker-ip>:30552
 ```
 
 The server is started with:
@@ -77,7 +77,7 @@ I.e. the 6600 XT is holding ~6 GiB of weights/KV and doing real compute during g
 
 ## Model + config matrix and measured tok/s
 
-Tokens/s numbers are from the last load-bearing requests on Arches (`llama-server` router mode, single parallel slot). `prompt eval` is tokens/s of prompt processing, `eval` is generated tokens/s. Where a model has `spec-type = draft-mtp`, decode goes through the MTP draft head.
+Tokens/s numbers are from the last load-bearing requests on primary (`llama-server` router mode, single parallel slot). `prompt eval` is tokens/s of prompt processing, `eval` is generated tokens/s. Where a model has `spec-type = draft-mtp`, decode goes through the MTP draft head.
 
 | Preset | Main GGUF | ctx | split | draft | prompt eval tok/s | decode tok/s |
 |---|---|---|---|---|---|---|

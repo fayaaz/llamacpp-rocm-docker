@@ -1,6 +1,6 @@
 services:
   server:
-    image: ghcr.io/fayaaz/llama-cpp-vulkan-rpc:latest
+    image: ghcr.io/<owner>/llama-cpp-vulkan-rpc:latest
     container_name: llama.cpp.server
     restart: always
     shm_size: '16gb'
@@ -24,7 +24,7 @@ services:
       "--parallel", "1",
     ]
     environment:
-      # RPC worker (6600 XT on k8s). Edit the IP:port for your LAN.
+      # RPC worker. Edit the IP:port for your LAN.
       LLAMA_ARG_RPC: "${LLAMA_ARG_RPC}"
     # environment:
     #   - HSA_OVERRIDE_GFX_VERSION=12.0.0
