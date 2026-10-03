@@ -1,6 +1,6 @@
 services:
   server:
-    image: ghcr.io/ggml-org/llama.cpp:server-vulkan
+    image: ghcr.io/ggml-org/llama.cpp:server-vulkan #-b9519
     container_name: llama.cpp.server
     restart: always
     shm_size: '16gb'
@@ -17,13 +17,13 @@ services:
     command: [
       "--models-dir", "/models",
       "--models-preset", "/config.ini",
-      "--max-models", "1",
+      "--models-max", "1",
       "--host", "0.0.0.0",
       "--port", "8080",
       "--parallel", "1",
     ]
-    environment:
-      - HSA_OVERRIDE_GFX_VERSION=12.0.0
+    # environment:
+    #   - HSA_OVERRIDE_GFX_VERSION=12.0.0
   downloader:
     build:
       context: .
