@@ -5,9 +5,9 @@ This repository provides a `docker-compose.yml` configuration to run a `llama.cp
 This has been tested on a PC with specs:
 - CPU: 9950X3D
 - RAM: 64GB
-- GPU: 9070XT with 16GB VRAM
+- GPU: 9700 XT with 16GB VRAM
 
-and is focused around running Gemma4-26B-A4B and qwen-3.5-27b.
+and is focused around running Qwen3.8-27B and the Qwen3.6-35B-A3B MoE.
 
 ## Services
 
@@ -30,14 +30,11 @@ and is focused around running Gemma4-26B-A4B and qwen-3.5-27b.
    ```
 
 2. **Download a model**:
-    Use the `downloader` service to fetch models from Hugging Face. Replace `<repo_id>` with the Hugging Face repository. For example, to download the Gemma-4-26B-A4B-it model:
+    Use the `downloader` service to fetch models from Hugging Face. Replace `<repo_id>` with the Hugging Face repository. Current useful presets in `config.ini`:
 
     ```bash
-    docker compose run --rm downloader hf download --local-dir /models unsloth/gemma-4-26B-A4B-it-GGUF gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
     # Qwen 3.5
      docker compose run --rm downloader hf download --local-dir /models bartowski/Qwen_Qwen3.5-27B-GGUF Qwen_Qwen3.5-27B-IQ3_M.gguf
-    # Gemma 4 31B
-     docker compose run --rm downloader hf download --local-dir /models bartowski/google_gemma-4-31B-it-GGUF gemma-4-31B-it-Q6_K.gguf
     # Qwen 3.6-35B-A3B
      docker compose run --rm downloader hf download --local-dir /models unsloth/Qwen3.6-35B-A3B-GGUF Qwen3.6-35B-A3B-UD-IQ4_XS.gguf
     # GLM Flash 4.7
