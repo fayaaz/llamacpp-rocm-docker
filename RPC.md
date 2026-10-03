@@ -1,0 +1,112 @@
+# Running Qwen3.8 over llama.cpp RPC between two nodes
+
+## Hardware
+
+| Node | CPU | RAM | GPU | VRAM |
+|---|---|---|---|---|
+| Arches | AMD Ryzen 9 9950X3D | 64 GB | AMD Radeon RX 9700 XT | 16 GB |
+| ownraptor | AMD Ryzen 5 3600 | 16 GB | AMD Radeon RX 6600 XT | 8 GB |
+
+Combined VRAM: ~24 GB. Network: LAN between the two nodes. RPC server runs on the 6600 XT box (ownraptor), llama-server runs on the 9700 XT box (Arches).
+
+## llama.cpp RPC overview
+
+llama.cpp's `--rpc` backend splits the model computation across machines. The master node loads the GGUF and streams hidden states; the RPC nodes execute tensor ops on those states and return results. RPC traffic is small (a few kB of hidden state per layer), so inference on RPC isn't bandwidth-limited — it's latency-limited.
+
+Important operational details:
+
+- `split-mode = layer` is required for cross-device splitting. `split-mode = none` pins everything to `main-gpu` and the RPC worker is only probed, never used.
+- `--fit` computes an offload plan across local GPUs and the RPC device. If KV cache or a draft model does not fit in the combined VRAM, they spill to system RAM first; the model still runs, but slowly.
+- The RPC server always exports all backends it was built with (Vulkan/CPU here). Our custom image `ghcr.io/fayaaz/llama-cpp-vulkan-rpc` is built with `GGML_VULKAN=ON` and `GGML_RPC=ON` from upstream `.devops/vulkan.Dockerfile`, and includes `ggml-rpc-server`.
+
+## Client setup (Arches / 9700 XT)
+
+`config.ini` preset example (`qwen-3.8-27b-uncensored-100k`):
+
+```ini
+model = /models/Qwen3.8-27B-Uncensored-IQ4_XS.gguf
+ctx-size = 102400
+parallel = 1
+split-mode = layer
+fit = on
+fit-target = 128
+fit-ctx = 102400
+flash-attn = on
+jinja = on
+cache-type-k = q8_0
+cache-type-v = q4_0
+batch-size = 2048
+ubatch-size = 256
+threads = 32
+reasoning = on
+reasoning-effort = xhigh
+
+spec-type = draft-mtp
+spec-draft-n-max = 2
+```
+
+`docker-compose.yml` supplies the RPC endpoint via env:
+
+```yaml
+environment:
+  LLAMA_ARG_RPC: "${LLAMA_ARG_RPC}"
+```
+
+`.env` (gitignored, create locally):
+
+```
+LLAMA_ARG_RPC=192.168.0.110:30552
+```
+
+The server is started with:
+
+```
+docker compose up -d server
+```
+
+The 6600 XT side runs the RPC worker listening on port 50052 inside the cluster (each request goes through a NodePort on the local network; see `chart/values.yaml` for the helm plumbing for that node).
+
+## Verified RPC usage
+
+Before RPC was actually put to use, the 6600 XT sat mostly idle during inference. Once `split-mode = layer` replaced `none` in the preset, `amdgpu_top` on the weak node showed:
+
+- `Total VRAM Usage: 6188 / 8176 MiB`
+- `gpu_activity GFX: 54%`, ~58 W total board power
+
+I.e. the 6600 XT is holding ~6 GiB of weights/KV and doing real compute during generation.
+
+## Model + config matrix and measured tok/s
+
+Tokens/s numbers are from the last load-bearing requests on Arches (`llama-server` router mode, single parallel slot). `prompt eval` is tokens/s of prompt processing, `eval` is generated tokens/s. Where a model has `spec-type = draft-mtp`, decode goes through the MTP draft head.
+
+| Preset | Main GGUF | ctx | split | draft | prompt eval tok/s | decode tok/s |
+|---|---|---|---|---|---|---|
+| `qwen-3.8-27b-100k` | Qwen3.8-27B-IQ4_XS (no MTP) | 102k | layer | none | 22.9 | 4.9 |
+| `qwen-3.8-27b-uncensored-100k` | Qwen3.8-27B-Uncensored-IQ4_XS | 102k | layer | fused MTP (`n_max=2`) | 33–37 | 32.2 |
+| `qwen-3.8-27b-q4km` | Qwen3.8-27B-UD-Q4_K_M | 65k | layer | separate `mtp-Qwen3.8-27B-Q4_0` | 33–40 | ~25–29 |
+| `qwen-3.8-27b-udq6k` | Qwen3.8-27B-UD-Q6_K | 131k | layer | separate MTP Q4_0 | 399–386 | ~19.0–19.5 |
+
+Notes on the measurements:
+
+- The MTP draft, when active, raises decode throughput roughly 1.6× over the same base without it. All uncensored presets have the MTP head fused in the main file; for the base model we attach a stand-alone MTP draft via `spec-draft-model`.
+- `qwen-3.8-27b-udq6k` fits in ~25 GiB total (weights ~21 GiB + mmproj ~0.9 GiB + 128k KV ~3.2 GiB compressed). That is marginally over the 24 GiB node pair, so some layers may sit in system RAM. It still runs without error at ~19 tok/s decode.
+- Prompt processing on a long 9.7k prompt ran at ~386–399 tok/s on the Q6 preset and ~256 tok/s on the IQ4 uncensored one, both with the draft enabled; v-cache hits made the IQ4 prompt path faster (up to ~154 t/s on long prompts in prior loads).
+
+## Practical KV cache sizing
+
+Weight sizes are ~15.3 GiB (IQ4_XS), ~16 GiB (Q4_K_M), ~19 GiB (Q5_K_M) and ~21 GiB (Q6_K). The only part that scales with context length on Qwen3.8 is the KV cache of the 16 full-attention layers; the 48 Gated DeltaNet layers hold a fixed-size recurrent state. Compact KV math from the model card: at `cache-type-k = q8_0`, `cache-type-v = q4_0` the 16 attention layers cost ~26.6 KB/token ≈ 2.5 GiB at 102400 ctx and ~6.5 GiB at native 262144 ctx.
+
+So on the 24 GiB pair, practical model + ctx budgets are:
+
+- IQ4_XS + 102k ctx + mmproj: ~15.3 + 2.5 + 0.9 ≈ 18.7 GiB — comfortable.
+- Q4_K_M + 131k ctx + mmproj: ~16 + 3.2 + 0.9 ≈ 20 GiB — comfortable.
+- Q5_K_M + 131k ctx + mmproj: ~19.8 + 3.2 + 0.9 ≈ 24 GiB — right at the edge.
+- Q6_K + 131k ctx + mmproj: ~21 + 3.2 + 0.9 ≈ 25 GiB — offloads some state to RAM, still runs at ~19 t/s.
+
+Dropping `cache-type-k` to `q4_0` roughly halves the Q8 half of KV and buys a couple of GiB headroom, at a measurable quality cost under heavy reasoning (upstream ggml-org/llama.cpp#23470). We chose q8_0 keys everywhere in the presets.
+
+## What does not transfer over RPC
+
+- llama.cpp RPC has no authentication and should not be exposed beyond the LAN (the `ggml-rpc-server` binary prints that warning itself).
+- The RPC worker does not need model files. Only the GGUF + mmproj on the master node matter. `--fit` converges to a layer split without consulting the RPC node's disk.
+- Draft-KV is incremental. If you tie a draft model that doesn't fit, the router loads it before the target weights and you can OOM that slot; keep it small (MTP Q4_0 is only ~1.9 GiB).
