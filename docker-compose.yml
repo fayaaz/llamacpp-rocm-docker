@@ -23,6 +23,9 @@ services:
       "--port", "8080",
       "--parallel", "1",
     ]
+    environment:
+      # RPC worker (6600 XT on k8s). Edit the IP:port for your LAN.
+      LLAMA_ARG_RPC: "192.168.1.1:8080"
     # environment:
     #   - HSA_OVERRIDE_GFX_VERSION=12.0.0
   downloader:
