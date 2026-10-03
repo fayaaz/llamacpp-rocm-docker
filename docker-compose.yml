@@ -1,6 +1,6 @@
 services:
   server:
-    image: ghcr.io/ggml-org/llama.cpp:server-vulkan #-b9519
+    image: ghcr.io/fayaaz/llama-cpp-vulkan-rpc:latest
     container_name: llama.cpp.server
     restart: always
     shm_size: '16gb'
@@ -15,6 +15,7 @@ services:
     ports:
       - "8080:8080"
     command: [
+      "--server",
       "--models-dir", "/models",
       "--models-preset", "/config.ini",
       "--models-max", "1",
